@@ -7,9 +7,21 @@
 from body_states import RobotState
 from plow_states_prototype import *
 
+
+try:
+    import sim
+except:
+    print ('--------------------------------------------------------------')
+    print ('"sim.py" could not be imported. This means very probably that')
+    print ('either "sim.py" or the remoteApi library could not be found.')
+    print ('Make sure both are in the same folder as this file,')
+    print ('or appropriately adjust the file "sim.py"')
+    print ('--------------------------------------------------------------')
+    print ('')
+
 class BodyStateMachine:
    
-    def __init__(self):
+    def __init__(self, plowAddress, frontProx, backProx, vision1, vision2, vision3):
       
 
         #Define States
@@ -45,13 +57,47 @@ class BodyStateMachine:
         followLine.addNextState(stuck)
         backward.addNextState(stuck)
 
+        #define sensors
+        visionSensors = [vision1, vision2, vision3]
+        proxSensors = [backProx, frontProx]
+
+        #define plow object
+        super.addPlow(plowAddress)
+
+        #add state object 
+        self.currState = initial
+
+        #indicates if plow deployed
+        self.plowDeployed = False
+
+    
+    
+    #def nextState(self):
+        #TBD
+
+    def setState(self, newState):
+        self.currState = newState
+
+    def getState(self):
+        return self.currState
+
+        
+
+    
+
 def main():
 
     #initialize body, plow, and sim
     body = BodyStateMachine()
-    plow = State()
+    clientID = 0
+
+    #plow = State()
+
+    #associate scripts as objects
 
     #start simulation
+    #clientID = sim.simxStart('127.0.0.1',19999,True,True,5000,5)
+   
 
     return 0; 
 

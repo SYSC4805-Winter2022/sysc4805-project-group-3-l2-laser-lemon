@@ -5,11 +5,12 @@
 #################
 
 import base_state_class
+import obstacle_avoidance_proximitysensor
 
 class RobotState(BasicState):
     def __init__(self, name):
         super().__init__(self, name)
-        self.plowObjs = [] # Can be used to reference plow API objects
+        self.plowObj = None # Can be used to reference plow API objects
 
     def addEntryAction(self, entry_action):
         super().addEntryAction(self, entry_action)
@@ -24,5 +25,8 @@ class RobotState(BasicState):
         super().addNextState(self, next_state)
 
     #to be implemented later
-    #def signalPlow(self, plowObject):
-        
+    def addPlow(self, plowObject):
+        self.plowObj = plowObject
+
+
+    
