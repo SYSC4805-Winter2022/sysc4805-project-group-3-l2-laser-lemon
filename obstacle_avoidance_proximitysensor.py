@@ -33,7 +33,7 @@ def startSimulation():
 
 
     
-
+# main function - Might rename this later
 if __name__ == "__main__":
 
     clientID = startSimulation()

@@ -5,6 +5,8 @@
 #################
 
 from body_states import RobotState
+from plow_states_prototype import *
+
 class BodyStateMachine:
    
     def __init__(self):
@@ -42,6 +44,16 @@ class BodyStateMachine:
         zigzag.addNextState(stuck)
         followLine.addNextState(stuck)
         backward.addNextState(stuck)
+
+def main():
+
+    #initialize body, plow, and sim
+    body = BodyStateMachine()
+    plow = State()
+
+    #start simulation
+
+    return 0; 
 
 
 
