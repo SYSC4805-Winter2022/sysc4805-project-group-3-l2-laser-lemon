@@ -2,7 +2,7 @@
 SYSC 4805 
 Group L2-3
 '''
-
+import os
 #Try to connect to coppeliasim python API library
 try:
     import sim
@@ -14,6 +14,7 @@ except:
     print ('or appropriately adjust the file "sim.py"')
     print ('--------------------------------------------------------------')
     print ('')
+    
 
 import time as t
 import math
@@ -35,23 +36,44 @@ def getObjectHandle(obj_name):
 def startSimulation():
     print ('Program started')
     sim.simxFinish(-1)
-    return sim.simxStart('127.0.0.1',19999,True,True,5000,5)
+    return sim.simxStart('127.0.0.1',19997,True,True,5000,5)
 
 def onOpen():
-    open = True
-    leftPanelBool = True
-    rightPanelBool = True
     # print("Beginning to Open Plow!")
+    inputIntegers = []
+    inputFloats = []
+    inputStrings = []
+    inputBuffer = bytearray()
+    sim.simxCallScriptFunction(clientID, 'plow_middle_panel', sim.sim_scripttype_childscript, 'onOpen',
+                                inputIntegers, inputFloats, inputStrings, inputBuffer, sim.simx_opmode_blocking)
+    opening = True
+    while opening:
+        errorFlag, signalFlag = sim.simxGetStringSignal(clientID, 'openFlag', sim.simx_opmode_blocking)
+        flag = signalFlag.decode('utf-8')
+        t.sleep(0.15)
+        if (flag == "1"):
+            opening = False
+        
+    print("Plow is opened!")
 
 def onClose():
-    close = True
-    leftPanelBool = True
-    rightPanelBool = True
     # print("Beginning to Close Plow!")
+    inputIntegers = []
+    inputFloats = []
+    inputStrings = []
+    inputBuffer = bytearray()
+    sim.simxCallScriptFunction(clientID, 'plow_middle_panel', sim.sim_scripttype_childscript, 'onClose',
+                                inputIntegers, inputFloats, inputStrings, inputBuffer, sim.simx_opmode_blocking)
 
-
-    
-
+    closing = True
+    while closing:
+        errorFlage, signalFlag = sim.simxGetStringSignal(clientID, 'closeFlag', sim.simx_opmode_blocking)
+        flag = signalFlag.decode('utf-8')
+        print(flag)
+        t.sleep(0.15)
+        if (flag == "1"):
+            closing = False
+    print("Plow is closed!")
 if __name__ == "__main__":
 
     clientID = startSimulation()
@@ -62,61 +84,23 @@ if __name__ == "__main__":
 
         #Get wheel and proximity sensor ObjectHandles
         #res,model = getObjectHandle('robot')
-
         res, left_joint  = getObjectHandle('left_joint1')
         res, right_joint = getObjectHandle('right_joint1')
 
         res, leftHinge  = getObjectHandle('plow_left_hinge')
         res, rightHinge = getObjectHandle('plow_right_hinge')
 
-        res, rightPanel = getObjectHandle('plow_right_panel')
-        res, leftPanel = getObjectHandle('plow_left_panel')
-        res, middlePanel = getObjectHandle('plow_middle_panel')
-
         res, prox_sensor_front= getObjectHandle('Proximity_sensor0')
         res, prox_sensor_right = getObjectHandle('Proximity_sensor1')
         res, prox_sensor_back = getObjectHandle('Proximity_sensor2')
         res, prox_sensor_left= getObjectHandle('Proximity_sensor3')
         
-
-        open = False
-        close = False
-
-        rightPanelBool = False
-        leftPanelBool = False
         #res, line_sensor = getObjectHandle('Line_Sensor')
 
         # OPEN CODE PORTION ----/:
-        res = setJointVelocity(rightHinge, -0.5)
-        while (getObjectOrientation(rightPanel,middlePanel)[1][2] * 57.2957795 < 135.0):
-            print("")
-        res = setJointVelocity(rightHinge, 0)
-
-        res = setJointVelocity(leftHinge, 0.5)
-        while (getObjectOrientation(leftPanel,middlePanel)[1][2] * 57.2957795 > -135.0):
-            print("")
-        res = setJointVelocity(leftHinge, 0)
-        #                      :\-------
-
+        onOpen()
         open = True
-
-
-
-        # # CLOSE CODE PORTION ----/:
-        # res = setJointVelocity(rightHinge, 0.5)
-        # while (getObjectOrientation(rightPanel,middlePanel)[1][2] * 57.2957795 > 2.0):
-        #     print("")
-        # res = setJointVelocity(rightHinge, 0)
-
-        # res = setJointVelocity(leftHinge, -0.5)
-        # while (getObjectOrientation(leftPanel,middlePanel)[1][2] * 57.2957795 < -2):
-        #     print("")
-        # res = setJointVelocity(leftHinge, 0)
-        # #                      :\-------
-
-
-
-        #rightPanelBool = False
+        sim.simxGetStringSignal
 
         while True:
 
@@ -135,16 +119,7 @@ if __name__ == "__main__":
                 res = setWheelVelocity(right_joint, 0)
                 if open:
                     # CLOSE CODE PORTION ----/:
-                    res = setJointVelocity(rightHinge, 1.5)
-                    while (getObjectOrientation(rightPanel,middlePanel)[1][2] * 57.2957795 > 2.0):
-                        print("")
-                    res = setJointVelocity(rightHinge, 0)
-
-                    res = setJointVelocity(leftHinge, -1.5)
-                    while (getObjectOrientation(leftPanel,middlePanel)[1][2] * 57.2957795 < -2):
-                        print("")
-                    res = setJointVelocity(leftHinge, 0)
-                    #                      :\-------
+                    onClose()
                     open = False
                 print("turning")
                 res = setWheelVelocity(left_joint, 50*math.pi/180)
@@ -197,15 +172,7 @@ if __name__ == "__main__":
                 res = setWheelVelocity(left_joint, 0)
                 res = setWheelVelocity(right_joint, 0)
                 if (not open):
-                    res = setJointVelocity(rightHinge, -1.5)
-                    while (getObjectOrientation(rightPanel,middlePanel)[1][2] * 57.2957795 < 135.0):
-                        print("")
-                    res = setJointVelocity(rightHinge, 0)
-
-                    res = setJointVelocity(leftHinge, 1.5)
-                    while (getObjectOrientation(leftPanel,middlePanel)[1][2] * 57.2957795 > -135.0):
-                        print("")
-                    res = setJointVelocity(leftHinge, 0)
+                    onOpen()
                     open = True
                 #                      :\-------
                 
@@ -218,4 +185,5 @@ if __name__ == "__main__":
         sim.simxFinish(clientID)
     else:
         print ('Failed connecting to remote API server')
-    print ('Program ended')
+        print ('Program ended')
+        sim.simxFinish(-1) # just in case, close all opened connections
