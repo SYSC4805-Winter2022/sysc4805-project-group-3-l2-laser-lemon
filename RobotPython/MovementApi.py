@@ -14,6 +14,7 @@ class WheelModule:
         return sim.simxSetJointTargetVelocity(self.clientId, handle, velocity, sim.simx_opmode_oneshot)
 
     def stop(self):
+        print("Stopping")
         res = self.setWheelVelocity(self.left_joint, 0)
         res = self.setWheelVelocity(self.right_joint, 0)
 
@@ -35,11 +36,15 @@ class WheelModule:
             time.sleep(2)
             self.stop()
 
-    def straight(self, distance):
+    def straightDist(self, distance):
         res = self.setWheelVelocity(self.left_joint, -2)
         res = self.setWheelVelocity(self.right_joint, -2)
         time.sleep(2/distance)
         self.stop()
+    
+    def straight(self):
+        res = self.setWheelVelocity(self.left_joint, -2)
+        res = self.setWheelVelocity(self.right_joint, -2)
 
     def turnLeft180(self):
             res = self.setWheelVelocity(self.left_joint, 100*math.pi/180)

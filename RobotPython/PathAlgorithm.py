@@ -19,13 +19,17 @@ def startSimulation():
 
 if __name__ == "__main__":
     clientId = startSimulation()
-    obsAvoid = ObstacleAvoidanceApi.ObstacleAvoidance(clientId)
-    vision = LineDetectionApi.VisionModule(clientId)
+    #obsAvoid = ObstacleAvoidanceApi.ObstacleAvoidance(clientId)
+    #vision = LineDetectionApi.VisionModule(clientId)
     motorControl = MovementApi.WheelModule(clientId)
-    plow.open(clientId)
+    #plow.open(clientId)
+    motorControl.straightDist(0.4)
+    print("Went 0.4 m")
+    #motorControl.turnLeft()
+    #motorControl.straight()
 
-    while True:
-        obsAvoid.avoid_obstacle()
+    while False:
+        #obsAvoid.avoid_obstacle()
         sensors = vision.detectLine()
         if any(s == 1 for s in sensors):
             motorControl.stop()
