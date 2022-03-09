@@ -74,6 +74,7 @@ def onClose():
         if (flag == "1"):
             closing = False
     print("Plow is closed!")
+
 if __name__ == "__main__":
 
     clientID = startSimulation()

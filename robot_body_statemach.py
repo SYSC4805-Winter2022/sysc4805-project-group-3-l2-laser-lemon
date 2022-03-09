@@ -6,7 +6,7 @@
 
 from body_states import RobotState
 from plow_states_prototype import *
-import obstacle_avoidance_proximitysensor 
+import plow_and_obstacle_avoidance_split_fns as poa
 
 
 try:
@@ -82,10 +82,13 @@ class BodyStateMachine:
     def getState(self):
         return self.currState
 
-        
+#copy from plow_and_obstacle_avoidance        
 def getObjectHandle(clientID, obj_name):
     return sim.simxGetObjectHandle(clientID, obj_name, sim.simx_opmode_blocking)
-   
+
+def detectSnow():
+    return 1
+
 #a placeholder function for the movement pattern functions
 def movementPatternPlaceholderfn1():
     return 1
@@ -98,7 +101,7 @@ def runAPIbackend():
     
     visionSensors = {getObjectHandle(clientID, 'vision1'), getObjectHandle(clientID, 'vision2'), getObjectHandle(clientID, 'vision3')}
 
-    proxSensors = {getObjectHandle(clientID, 'Proximity_sensor0'), getObjectHandle(clientID, 'Proximity_sensor1')}
+    proxSensors = {getObjectHandle(clientID, 'Proximity_sensor0'), getObjectHandle(clientID, 'Proximity_sensor1'), getObjectHandle(clientID, 'Proximity_sensor2'), getObjectHandle(clientID, 'Proximity_sensor3')}
     
     plow = PlowFSM()
     body = BodyStateMachine(plow, proxSensors[0], proxSensors[1], visionSensors[0], visionSensors[1], visionSensors[2])
@@ -107,20 +110,20 @@ def runAPIbackend():
 
 
     #start simulation
-    
+    poa.startSimulation()
    
     while clientID != -1: #while valid connection
         #poll sensors 
 
-        if proxSensors[0] or proxSensors[1]: # if front or back sensor returns 1
-            obstacle_avoidance_proximitysensor.avoid_obstacle()
+        if proxSensors[0] or proxSensors[1] or proxSensors[2] or proxSensors[3]: # if front or back sensor returns 1
+            poa.avoid_obstacle(clientID)
         if (visionSensors[0] or visionSensors[1] or visionSensors[2]):
             followLine()
         #conditions for missing logic here
         #if detectSnow(): #if there's some snow still in the area   
         #   movementPatternPlaceholderfn1()
     return 0 
-    
+
 
 
 
