@@ -34,13 +34,14 @@ def startSimulation():
 
     
 # main function - Might rename this later
-if __name__ == "__main__":
+#renamed and made callable by the main program, commented out some functions
+def avoid_obstacle(clientID):
 
-    clientID = startSimulation()
+    #clientID = startSimulation()
     
     if clientID!=-1:
-        print ('Connected to remote API server')
-        sim.simxAddStatusbarMessage(clientID,'Python Script Connected.',sim.simx_opmode_oneshot)
+        #print ('Connected to remote API server')
+        sim.simxAddStatusbarMessage(clientID,'Obstacle avoidance script initiated.',sim.simx_opmode_oneshot)
 
         #Get wheel and proximity sensor ObjectHandles
         #res,model = getObjectHandle('robot')
@@ -49,21 +50,20 @@ if __name__ == "__main__":
         res, prox_sensor = getObjectHandle('Proximity_sensor0')
         #res, line_sensor = getObjectHandle('Line_Sensor')
 
-        while True:
-
-            res = sim.simxGetObjectGroupData(clientID, 5, 13, sim.simx_opmode_blocking)
-            returnCode,detectionState = sim.simxReadProximitySensor(clientID, prox_sensor, sim.simx_opmode_streaming)[0:2] #simx_opmode_streaming
-            print(detectionState)
-            if detectionState:
-            #Make Bot Turn #turning left
-                print("turning")
-                res = setWheelVelocity(left_joint, 100*math.pi/180)
-                res = setWheelVelocity(right_joint, 50*math.pi/180)
-                t.sleep(2)
-            else:
-            #Make Bot Move straight
-                res = setWheelVelocity(left_joint, 200*math.pi/-180)
-                res = setWheelVelocity(right_joint, 200*math.pi/-180)    
+        #while True:
+        res = sim.simxGetObjectGroupData(clientID, 5, 13, sim.simx_opmode_blocking)
+        returnCode,detectionState = sim.simxReadProximitySensor(clientID, prox_sensor, sim.simx_opmode_streaming)[0:2] #simx_opmode_streaming
+        print(detectionState)
+        if detectionState:
+        #Make Bot Turn #turning left
+            print("turning")
+            res = setWheelVelocity(left_joint, 100*math.pi/180)
+            res = setWheelVelocity(right_joint, 50*math.pi/180)
+            t.sleep(2)
+        else:
+        #Make Bot Move straight
+            res = setWheelVelocity(left_joint, 200*math.pi/-180)
+            res = setWheelVelocity(right_joint, 200*math.pi/-180)    
         sim.simxGetPingTime(clientID)
         sim.simxFinish(clientID)
     else:
