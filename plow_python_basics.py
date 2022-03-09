@@ -35,7 +35,7 @@ def getObjectHandle(obj_name):
 def startSimulation():
     print ('Program started')
     sim.simxFinish(-1)
-    return sim.simxStart('127.0.0.1',19999,True,True,5000,5)
+    return sim.simxStart('127.0.0.1',19998,True,True,5000,5)
 
 def onOpen():
     open = True
