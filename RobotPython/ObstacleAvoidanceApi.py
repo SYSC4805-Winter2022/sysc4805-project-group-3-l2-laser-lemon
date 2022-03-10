@@ -7,7 +7,7 @@ Group L2-3
 import sim
 import time as t
 import math
-
+import MovementApi
 class ObstacleAvoidance:
     def __init__(self, clientId):
         res, left_joint  = sim.simxGetObjectHandle(clientId, 'left_joint1', sim.simx_opmode_blocking)
@@ -23,10 +23,12 @@ class ObstacleAvoidance:
         self.prox_sensor_left = prox_sensor_left
         self.prox_sensor_back = prox_sensor_back
         self.clientID = clientId
-        sim.simxAddStatusbarMessage(self.clientID,'Obstacle avoidance script initiated.',sim.simx_opmode_oneshot)
+
+        self.motors = MovementApi.WheelModule(self.clientID)
+        #sim.simxAddStatusbarMessage(self.clientID,'Obstacle avoidance script initiated.',sim.simx_opmode_oneshot)
 
     def setWheelVelocity(self, handle, velocity):
-        return sim.simxSetJointTargetVelocity(self.clientID, handle, velocity, sim.simx_opmode_oneshot)
+        return sim.simxSetJointTargetVelocity(self.clientID, handle, velocity, sim.simx_opmode_blocking)
         
     # main function - Might rename this later
     #renamed and made callable by the main program, commented out some functions
@@ -64,5 +66,4 @@ class ObstacleAvoidance:
             res = self.setWheelVelocity(self.left_joint, 200*math.pi/-180)
             res = self.setWheelVelocity(self.right_joint, 200*math.pi/-180)
         else:
-            res = self.setWheelVelocity(self.left_joint, 200*math.pi/-180)
-            res = self.setWheelVelocity(self.right_joint, 200*math.pi/-180) 
+            self.motors.straight(1)
