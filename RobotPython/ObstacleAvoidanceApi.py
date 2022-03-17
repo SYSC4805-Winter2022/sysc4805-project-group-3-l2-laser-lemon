@@ -42,6 +42,7 @@ class ObstacleAvoidance:
 
         if detectionState:
             print("turning")
+            self.motors.stop()
             res = self.setWheelVelocity(self.left_joint, -50*math.pi/180)
             res = self.setWheelVelocity(self.right_joint, 5*math.pi/180)
             t.sleep(1)
@@ -50,6 +51,7 @@ class ObstacleAvoidance:
         elif detectrightSide:
             #Make Bot Turn #turning left
             print("turning")
+            self.motors.stop()
             res = self.setWheelVelocity(self.left_joint, 100*math.pi/180)
             res = self.setWheelVelocity(self.right_joint, 50*math.pi/180)
             t.sleep(1)
@@ -57,13 +59,15 @@ class ObstacleAvoidance:
         elif detectleftSide:
             #Make Bot Turn #turning right
             print("turning")
+            self.motors.stop()
             res = self.setWheelVelocity(self.left_joint, 50*math.pi/180)
             res = self.setWheelVelocity(self.right_joint, 100*math.pi/180)
             t.sleep(1)
 
         elif detectBack:
             #Make Bot Move straight
+            self.motors.stop()
             res = self.setWheelVelocity(self.left_joint, 200*math.pi/-180)
             res = self.setWheelVelocity(self.right_joint, 200*math.pi/-180)
         else:
-            self.motors.straight(1)
+            self.motors.straight(1.2)
