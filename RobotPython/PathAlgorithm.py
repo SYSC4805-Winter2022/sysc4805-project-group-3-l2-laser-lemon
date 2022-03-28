@@ -4,12 +4,14 @@ import ObstacleAvoidanceApi
 import LineDetectionApi
 import MovementApi
 import time
+import threading
+import multiprocessing
 
 import sim
 import sys
+from ctypes import c_wchar_p
 
-flagEastWest = not True
-
+flagEastWest = True
 def startSimulation():
     print ('Program started')
     sim.simxFinish(-1)
@@ -20,66 +22,141 @@ def startSimulation():
     
     return clientId
 
+
+class SnowPlowRobot:
+    def __init__(self):
+         #n-North, e-East, w-West, s-South
+        self.turning = False
+        self.mainThread = None
+        self.insideBoundary = True
+        manager = multiprocessing.Manager()
+        self.boundaryHit = manager.Value(c_wchar_p, "-1")
+        self.clientId = startSimulation()
+        self.vision = LineDetectionApi.VisionModule(self.clientId)
+        self.motorControl = MovementApi.WheelModule(self.clientId)
+        lineDetectionThread = threading.Thread(target=self.checkForLine, args=())
+        self.runMainLoop = False
+        plow.open(self.clientId)
+
+        self.motorControl.straightDist(1, -1)
+        self.motorControl.turnRight(90)
+        self.motorControl.stop()
+        self.motorControl.straight(-1)
+        lineDetectionThread.start()
+        #threading.Thread(target=self.mainLoop, args=(self.motorControl,)).start()
+        print("Entering Detection Loop")
+
+
+            
+    def mainLoop(self, motorControl):
+        print("Hello From Main Thread")
+        print("main")
+        self.turning = True
+        if(self.boundaryHit.value != "-1"):
+            print(self.boundaryHit.value == "e")
+            if (self.boundaryHit.value == "n"): 
+                motorControl.backward(1, -1)
+                motorControl.turnRight(90)
+                motorControl.stop()
+                motorControl.straightDist(0.5, -1)
+                motorControl.stop()
+                motorControl.turnRight(90)
+                motorControl.stop()
+            elif (self.boundaryHit.value == "e"):
+                print("Turning to West")
+                motorControl.backward(1, -1)
+                motorControl.turnLeft(90)
+                motorControl.stop()
+                motorControl.straightDist(0.5, -1)
+                motorControl.stop()
+                motorControl.turnLeft(90)
+                motorControl.stop()
+            elif (self.boundaryHit.value == "s"):
+                motorControl.backward(1, -1)
+                motorControl.turnLeft(90)
+                motorControl.stop()
+                motorControl.straightDist(0.5, -1)
+                motorControl.stop()
+                motorControl.turnLeft(90)
+                motorControl.stop()
+            elif (self.boundaryHit.value == "w"): 
+                motorControl.backward(1, -1)
+                motorControl.turnRight(90)
+                motorControl.stop()
+                motorControl.straightDist(0.5, -1)
+                motorControl.stop()
+                motorControl.turnRight(90)
+                motorControl.stop()
+            self.boundaryHit.value = "-1"
+            self.turning = False
+            motorControl.straight(-1)
+
+        print("Completing Main")
+
+
+    def checkForLine(self):
+        print("Hello From Vision Module Thread")
+        newDetection = True
+        loop = None
+        while True:
+            time.sleep(0.1)
+            bounds = self.checkIfInBounds()
+            sensors = self.vision.detectLine()
+            if(bounds):
+                if any(s == 1 for s in sensors):
+                    if(newDetection):
+                        newDetection = False
+                        self.motorControl.stop()
+                        print("Boundary Hit")
+                        self.boundaryHit.value = self.motorControl.getDirection()
+                        print("Vision: " + str(self.boundaryHit.value))
+                        if(loop is None or not loop.is_alive()):
+                            loop = threading.Thread(target=self.mainLoop, args=(self.motorControl,))
+                            loop.run()
+                        time.sleep(0.2)
+                else:
+                    newDetection = True        
+
+    def checkIfInBounds(self):
+        bounds = self.motorControl.checkIfInBounds()
+        if (bounds is not None):
+            print("Not in bounds")
+            if bounds == "n":
+                self.motorControl.emergencyStopFunc()
+                self.motorControl.turnDirection("s")
+                self.motorControl.straight(-1)
+                time.sleep(0.5)
+                self.boundaryHit.value = "-1"
+            elif bounds == "e":
+                self.motorControl.emergencyStopFunc()
+                self.motorControl.turnDirection("w")
+                self.motorControl.straight(-1)
+                time.sleep(0.5)
+                self.boundaryHit.value = "-1"
+            elif bounds == "s":
+                self.motorControl.emergencyStopFunc()
+                self.motorControl.turnDirection("n")
+                self.motorControl.straight(-1)
+                time.sleep(0.5)
+                self.boundaryHit.value = "-1"
+            elif bounds == "w":
+                self.motorControl.emergencyStopFunc()
+                self.motorControl.turnDirection("e")
+                self.motorControl.straight(-1)
+                time.sleep(0.5)
+                self.boundaryHit.value = "-1"
+            return False        
+        else:
+            return True
+
+
+
+
 if __name__ == "__main__":
-    clientId = startSimulation()
+    
     #obsAvoid = ObstacleAvoidanceApi.ObstacleAvoidance(clientId)
-    vision = LineDetectionApi.VisionModule(clientId)
-    motorControl = MovementApi.WheelModule(clientId)
-    plow.open(clientId)
-    #motorControl.straightDist(1, 1)
-    #motorControl.turnRight(90)
-    #motorControl.stop()
-    motorControl.straight(2)
-
-
+    print("Welcome to Lemon-Laser's Autonomous Snow Plow Robot")
+    LemonLaserPlow = SnowPlowRobot()
     while True:
-        #obsAvoid.avoid_obstacle()
-        sensors = vision.detectLine()
-        #motorControl.stayOnPath()
-        
-        if any(s == 1 for s in sensors[0:2]):
-            motorControl.stop()
-            if sensors[3] ==1:
-                flagEastWest = flagEastWest
-
-                print("Stopping")
-                print("Backwards")
-            if flagEastWest:
-                motorControl.backward(1.2, 0.5)
-                if motorControl.getDirection() == "e":
-                    motorControl.turnLeft(90)
-                    motorControl.straightDist(0.05, 1)
-                    motorControl.turnLeft(90)
-                    motorControl.stop()
-                    
-                    motorControl.stop()
-                elif motorControl.getDirection() == "w":
-                    motorControl.turnRight(90)
-                    motorControl.straightDist(0.05, 1)
-                    motorControl.turnRight(90)
-                    motorControl.stop()
-                motorControl.straight(2)
-            else:
-                print("Stopping")
-                print("Backwards")
-                motorControl.backward(1.2, 0.5)
-                if motorControl.getDirection() == "n":
-                    motorControl.turnLeft(90)
-                    motorControl.straightDist(0.05, 1)
-                    motorControl.turnLeft(90)
-                    motorControl.stop()
-                    
-                    motorControl.stop()
-                elif motorControl.getDirection() == "s":
-                    motorControl.turnRight(90)
-                    motorControl.straightDist(0.05, 1)
-                    motorControl.turnRight(90)
-                    motorControl.stop()
-                motorControl.straight(2)
-
-
-
-
-
-
+        continue
 
