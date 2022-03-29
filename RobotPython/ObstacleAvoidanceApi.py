@@ -10,8 +10,8 @@ import math
 import MovementApi
 class ObstacleAvoidance:
     def __init__(self, clientId):
-        res, left_joint  = sim.simxGetObjectHandle(clientId, 'left_joint1', sim.simx_opmode_blocking)
-        res, right_joint = sim.simxGetObjectHandle(clientId, 'right_joint1', sim.simx_opmode_blocking)
+        res, left_joint  = sim.simxGetObjectHandle(clientId, 'leftJoint', sim.simx_opmode_blocking)
+        res, right_joint = sim.simxGetObjectHandle(clientId, 'rightJoint', sim.simx_opmode_blocking)
         res, prox_sensor_front = sim.simxGetObjectHandle(clientId, 'Proximity_sensor0', sim.simx_opmode_blocking)
         res, prox_sensor_right = sim.simxGetObjectHandle(clientId, 'Proximity_sensor1', sim.simx_opmode_blocking)
         res, prox_sensor_back = sim.simxGetObjectHandle(clientId, 'Proximity_sensor2', sim.simx_opmode_blocking)
@@ -23,6 +23,7 @@ class ObstacleAvoidance:
         self.prox_sensor_left = prox_sensor_left
         self.prox_sensor_back = prox_sensor_back
         self.clientID = clientId
+        self.prevObst = False
 
         self.motors = MovementApi.WheelModule(self.clientID)
         #sim.simxAddStatusbarMessage(self.clientID,'Obstacle avoidance script initiated.',sim.simx_opmode_oneshot)
@@ -41,33 +42,39 @@ class ObstacleAvoidance:
         returnCode, detectBack = sim.simxReadProximitySensor(self.clientID, self.prox_sensor_back, sim.simx_opmode_streaming)[0:2] #simx_opmode_streaming
 
         if detectionState:
+            self.prevObst = True
             print("turning")
-            self.motors.stop()
+            self.motors.emergencyStopFunc()
             res = self.setWheelVelocity(self.left_joint, -50*math.pi/180)
             res = self.setWheelVelocity(self.right_joint, 5*math.pi/180)
             t.sleep(1)
 
         #if right sensor detects an obstacle, robot should turn left
-        elif detectrightSide:
+        elif False and detectrightSide:
+            self.prevObst = True
             #Make Bot Turn #turning left
             print("turning")
-            self.motors.stop()
+            self.motors.emergencyStopFunc()
             res = self.setWheelVelocity(self.left_joint, 100*math.pi/180)
             res = self.setWheelVelocity(self.right_joint, 50*math.pi/180)
             t.sleep(1)
 
-        elif detectleftSide:
+        elif False and detectleftSide:
+            self.prevObst = True
             #Make Bot Turn #turning right
             print("turning")
-            self.motors.stop()
+            self.motors.emergencyStopFunc()
             res = self.setWheelVelocity(self.left_joint, 50*math.pi/180)
             res = self.setWheelVelocity(self.right_joint, 100*math.pi/180)
             t.sleep(1)
 
-        elif detectBack:
+        elif False and detectBack:
+            self.prevObst = True
             #Make Bot Move straight
-            self.motors.stop()
+            self.motors.emergencyStopFunc()
             res = self.setWheelVelocity(self.left_joint, 200*math.pi/-180)
             res = self.setWheelVelocity(self.right_joint, 200*math.pi/-180)
         else:
-            self.motors.straight(1.2)
+            if(self.prevObst):
+                self.motors.straight(-2)
+                self.prevObst = False

@@ -25,7 +25,7 @@ class WheelModule:
             "w": 1.57
         }
         self.currentDirection = "n"
-        self.wheelRadius = 0.086/2
+        self.wheelRadius = 0.172/2
 
         self.velocity = -1
 
@@ -87,7 +87,7 @@ class WheelModule:
             angularV = -1*velocity/self.wheelRadius
 
             res, ori = sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_blocking)
-            sim.simxSetObjectOrientation(self.clientId, self.robot, -1, [ori[0], ori[1], self.direction[self.currentDirection]], sim.simx_opmode_blocking)
+            #sim.simxSetObjectOrientation(self.clientId, self.robot, -1, [ori[0], ori[1], self.direction[self.currentDirection]], sim.simx_opmode_blocking)
             self.callStraight(angularV)
 
         

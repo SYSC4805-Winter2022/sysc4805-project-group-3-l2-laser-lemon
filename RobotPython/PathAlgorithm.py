@@ -11,11 +11,12 @@ import sim
 import sys
 from ctypes import c_wchar_p
 
+
 flagEastWest = True
 def startSimulation():
     print ('Program started')
     sim.simxFinish(-1)
-    clientId = sim.simxStart('127.0.0.1',19998,True,True,5000,1)
+    clientId = sim.simxStart('127.0.0.1',19999,True,True,5000,1)
     if clientId == -1:
         print("Connection Unsuccesful")
         sys.exit(-1)
@@ -35,16 +36,21 @@ class SnowPlowRobot:
         self.vision = LineDetectionApi.VisionModule(self.clientId)
         self.motorControl = MovementApi.WheelModule(self.clientId)
         lineDetectionThread = threading.Thread(target=self.checkForLine, args=())
+        
+        self.obstAvoidModule = ObstacleAvoidanceApi.ObstacleAvoidance(self.clientId)
+        ObstacleDetectionThread = threading.Thread(target=self.checkForObstacle, args=())
+
         self.runMainLoop = False
         plow.open(self.clientId)
 
-        self.motorControl.straightDist(1, -1)
+        self.motorControl.straightDist(1, -2)
         self.motorControl.turnRight(90)
         self.motorControl.stop()
-        self.motorControl.straight(-1)
-        lineDetectionThread.start()
-        #threading.Thread(target=self.mainLoop, args=(self.motorControl,)).start()
+        self.motorControl.straight(-2)
         print("Entering Detection Loop")
+        while True:
+            self.checkForLine()
+            self.checkForObstacle()
 
 
             
@@ -89,33 +95,35 @@ class SnowPlowRobot:
                 motorControl.stop()
             self.boundaryHit.value = "-1"
             self.turning = False
-            motorControl.straight(-1)
+            motorControl.straight(-2)
 
         print("Completing Main")
 
 
     def checkForLine(self):
-        print("Hello From Vision Module Thread")
+        
         newDetection = True
         loop = None
-        while True:
-            time.sleep(0.1)
-            bounds = self.checkIfInBounds()
-            sensors = self.vision.detectLine()
-            if(bounds):
-                if any(s == 1 for s in sensors):
-                    if(newDetection):
-                        newDetection = False
-                        self.motorControl.stop()
-                        print("Boundary Hit")
-                        self.boundaryHit.value = self.motorControl.getDirection()
-                        print("Vision: " + str(self.boundaryHit.value))
-                        if(loop is None or not loop.is_alive()):
-                            loop = threading.Thread(target=self.mainLoop, args=(self.motorControl,))
-                            loop.run()
-                        time.sleep(0.2)
-                else:
-                    newDetection = True        
+        print("Vision")
+        bounds = self.checkIfInBounds()
+        sensors = self.vision.detectLine()
+        if(bounds):
+            if any(s == 1 for s in sensors):
+                if(newDetection):
+                    newDetection = False
+                    self.motorControl.stop()
+                    print("Boundary Hit")
+                    self.boundaryHit.value = self.motorControl.getDirection()
+                    print("Vision: " + str(self.boundaryHit.value))
+                    if(loop is None or not loop.is_alive()):
+                        loop = threading.Thread(target=self.mainLoop, args=(self.motorControl,))
+                        loop.run()
+                    time.sleep(0.2)
+            else:
+                newDetection = True 
+    def checkForObstacle(self):
+        print("Obst")
+        self.obstAvoidModule.avoid_obstacle()       
 
     def checkIfInBounds(self):
         bounds = self.motorControl.checkIfInBounds()
