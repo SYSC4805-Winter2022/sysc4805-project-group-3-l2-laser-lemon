@@ -1,22 +1,35 @@
+"""
+Author: Emma Boulay
+SYSC 4805 L2G3
+"""
+
 import sim
 import math
 
 def checkForObstacle(motorControl, clientId, velocity):
-    inputIntegers = []
-    inputFloats = [velocity[0], velocity[1]]
-    inputStrings = []
-    inputBuffer = bytearray()
-    #checkIfInBounds(motorControl, clientId)
-    inputFloats = [2/motorControl.wheelRadius, 2/motorControl.wheelRadius]
+    """This function checks if an object is detected and uses the Braitenberg algorithm
+    to avoid obstacles.
+
+    Args:
+        motorControl (WheelModule): The wheel module for the robot
+        clientId (int): The client ID for the Remote API server
+        velocity (float): The velocity in rad/s
+
+    Returns:
+        _type_: _description_
+    """
+    #Make call to Lua program to run object detection and avoidance function
     res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, 'robot', sim.sim_scripttype_childscript, 'detectObstacle',
-                                inputIntegers, inputFloats, inputStrings, inputBuffer, sim.simx_opmode_blocking)
-    
+                                [], [velocity[0], velocity[1]], [], bytearray(), sim.simx_opmode_blocking)
+    #The Lua call returns 1 if an object was detected
     if res == sim.simx_return_ok:
         if(len(retInts) > 0):
             if(retInts[0] == 1):
                 return True
         return False
 
+
+########################## IGNORE#########################
 def checkIfInBounds(motorControl, clientId):
     res, currentPos = sim.simxGetObjectPosition(clientId, motorControl.robot, -1, sim.simx_opmode_blocking)
     print(currentPos)
