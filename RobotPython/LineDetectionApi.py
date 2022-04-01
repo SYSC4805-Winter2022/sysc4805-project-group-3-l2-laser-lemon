@@ -1,3 +1,8 @@
+"""
+Author: Emma Boulay
+SYSC 4805 L2G3
+"""
+
 import sim
 class VisionModule:
     """
