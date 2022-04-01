@@ -1,6 +1,9 @@
 """
 Author: Emma Boulay
 SYSC 4805 L2G3
+
+ObstacleAvoidanceApi.py is responsible for communicating with the proximity sensors
+on the robot. It also utilizes the Braitenberg algorithm to detect and avoid obstacles.
 """
 
 import sim

@@ -1,6 +1,9 @@
 """
 Author: Emma Boulay
 SYSC 4805 L2G3
+
+The WheelModule class is responsible for the drive control of the robot. 
+It provides functionality to driving straight, backwards, and turn left or right.
 """
 
 import sim

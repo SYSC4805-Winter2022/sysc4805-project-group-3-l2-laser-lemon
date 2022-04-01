@@ -1,6 +1,10 @@
 """
 Author: Emma Boulay
 SYSC 4805 L2G3
+
+The VisionModule class is responsible for communicating with the vision sensors.
+It provides functionality to check which vision sensors detect a line.
+
 """
 
 import sim

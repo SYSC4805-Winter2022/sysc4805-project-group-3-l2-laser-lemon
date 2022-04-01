@@ -1,6 +1,10 @@
 """
 Author: Emma Boulay
 SYSC 4805 L2G3
+
+The SnowPlow Robot class is responsible for controlling all the 
+robot modules (Vision, Obstacle Avoidance, Plow, Motors) and implementing
+the pathing algorithm.
 """
 #Robot Module Imports
 import PlowApi as plow
