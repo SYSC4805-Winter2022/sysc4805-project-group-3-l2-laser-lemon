@@ -21,7 +21,7 @@ def startSimulation():
     """
     print ('Program started')
     sim.simxFinish(-1)
-    clientId = sim.simxStart('127.0.0.1',19997,True,True,5000,1)
+    clientId = sim.simxStart('127.0.0.1',19998,True,True,5000,1)
     if clientId == -1:
         print("Connection Unsuccesful")
         sys.exit(-1)
