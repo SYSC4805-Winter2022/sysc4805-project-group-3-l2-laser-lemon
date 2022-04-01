@@ -13,7 +13,7 @@ def open(clientID):
     """
      # This makes a call to the Lua program to open the plow
     sim.simxCallScriptFunction(clientID, 'plow_middle_panel', sim.sim_scripttype_childscript, 'onOpen',
-                                [],[], [], bytearray(), sim.simx_opmode_blocking)]
+                                [],[], [], bytearray(), sim.simx_opmode_blocking)
     opening = True
     #Wait until plow finishes opening before continuing
     while opening:

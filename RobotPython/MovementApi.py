@@ -235,15 +235,44 @@ class WheelModule:
                 res = self.setWheelVelocity(self.right_joint, -0.05/self.wheelRadius)
     
     def getRobotState(self):
+        """Returns the current robot state
+
+        Returns:
+            RobotState (int): STOP = 1, STRAIGHT = 2, BACKWARD = 3, TURNING_LEFT = 4, TURNING_RIGHT = 5
+        """
         return self.robotState
 
 def simxGetObjectPosition(clientId, handle, reference, mode):
+    """Helper function for getting the object position. When using
+    the buffer mode it may return -1 the first time.
+
+    Args:
+        clientId (int): The client ID for the Remote API server
+        handle (tuple): Object handle 
+        reference (tuple): Object handle for reference
+        mode (simx): The connection type
+
+    Returns:
+        res, position: The position of the handle
+    """
     res, orientation = sim.simxGetObjectPosition(clientId, handle, reference, mode)
     while (res != sim.simx_return_ok):
         res, orientation = sim.simxGetObjectPosition(clientId, handle, reference, mode)
     return res, orientation
 
 def simxGetObjectOrientation(clientId, handle, reference, mode):
+    """Helper function for getting the object orientation. When using
+    the buffer mode it may return -1 the first time.
+
+    Args:
+        clientId (int): The client ID for the Remote API server
+        handle (tuple): Object handle 
+        reference (tuple): Object handle for reference
+        mode (simx): The connection type
+
+    Returns:
+        res, orientation: The orientation of the handle
+    """
     res, orientation = sim.simxGetObjectOrientation(clientId, handle, reference, mode)
     while (res != sim.simx_return_ok):
         res, orientation = sim.simxGetObjectOrientation(clientId, handle, reference, mode)
