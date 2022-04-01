@@ -37,8 +37,7 @@ class VisionModule:
         for i in range(0,len(self.vSensors)):
             returnCode, detectionState,Data=sim.simxReadVisionSensor(self.clientId, self.vSensors[i],sim.simx_opmode_blocking);
             if(detectionState > -1): #If the vision sensor detected new thing, update
-                
-                if(Data[0][10] < 0.4): #If it sees black (low intensity)
+                if(Data[0][10] < 0.4 or Data[0][10] > 0.95): #If it sees black (low intensity) (or the starting line)
                     sensor_values[i] = 1
                 else:
                     sensor_values[i] = 0

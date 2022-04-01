@@ -69,21 +69,18 @@ class WheelModule:
         if(not self.emergencyStop):
             #Start stream to optimize remote api connection
             sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_streaming)
-            radToTurn = deg*math.pi/180
-            #Compute new orientation after turn
-            res, currRad = simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
-            if (currRad[2] < 0):
-                currRad[2] += 6.28
-            targetDirection = (currRad[2] - radToTurn)
-            if(targetDirection < 0):
-                targetDirection = 6.28 + targetDirection
             #Set wheels to turn right
             res = self.setWheelVelocity(self.left_joint, 0.7/self.wheelRadius)
-            res = self.setWheelVelocity(self.right_joint, -0.1/self.wheelRadius)
-            #Keep turning until desired orientation or emergency stop
+            res = self.setWheelVelocity(self.right_joint, -0.1/self.wheelRadius) 
+            res, previousAngle = simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+            previousAngle = previousAngle[2]*180/math.pi
+            rot = 0
+            #If an emergency stop immediately exit
             while not self.emergencyStop:
+                #If obstacle is detected that will interfere with plow stop turning
                 if(ObsAvoid.checkForObstacleTurning(self.clientId)):
                     break
+                #If the line is detected turn other way slightly
                 sensors = self.vision.detectLine()
                 if (sensors[0] == 1):
                     self.turnRight(45)
@@ -91,12 +88,19 @@ class WheelModule:
                 elif(sensors[2] == 1):
                     self.turnLeft(45)
                     break
-                    
-                res, currRad = simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
-                currRad = currRad[2]
-                if (currRad < 0):
-                   currRad += 6.28
-                if(math.fabs(currRad-targetDirection) < 0.3):
+                #Check new rotation distance
+                res, angle = simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+                angle = angle[2]*180/math.pi
+                da = previousAngle-angle
+                if da >= 0 :
+                    rot -= angle - previousAngle 
+                else:
+                    rot += angle - previousAngle
+                #If rotated desired amount, exit
+                if rot >= deg:
+                    #CopelliaSim's orientation layout is weird. Turn 90degrees or less at a time 
+                    if (deg > 90):
+                        self.turnRight(deg-90) 
                     break
             sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_discontinue) #Stop stream
             #The robot has turned, now stop
@@ -114,32 +118,42 @@ class WheelModule:
         self.robotState = MovingState.TURNING_LEFT
         objectDetect = False
         if(not self.emergencyStop):
-            radToTurn = deg*math.pi/180
             #Start stream to optimize remote api connection
             sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_streaming)
-            #Compute new orientation after turn
-            res, currRad = sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
-            if (currRad[2] < 0):
-                currRad[2] += 6.28
-            targetDirection = (currRad[2] + radToTurn)
-            if(targetDirection > 6.28):
-                targetDirection -= 6.28
-            #Set wheels to turn left
+            #Set wheels to turn right
             res = self.setWheelVelocity(self.left_joint, -0.1/self.wheelRadius)
-            res = self.setWheelVelocity(self.right_joint, 0.7/self.wheelRadius)
-            #Keep turning until desired orientation or emergency stop
+            res = self.setWheelVelocity(self.right_joint, 0.7/self.wheelRadius) 
+            res, previousAngle = simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+            previousAngle = previousAngle[2]*180/math.pi
+            rot = 0
+            #If an emergency stop immediately exit
             while not self.emergencyStop:
+                #If obstacle is detected that will interfere with plow stop turning
                 if(ObsAvoid.checkForObstacleTurning(self.clientId)):
                     break
-                if any(s == 1 for s in self.vision.detectLine()):
+                #If the line is detected stop turning
+                sensors = self.vision.detectLine()
+                if (sensors[0] == 1):
+                    self.turnRight(45)
                     break
-                res, currRad = sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
-                currRad = currRad[2]
-                if (currRad < 0):
-                    currRad += 6.28
-                if(math.fabs(currRad-targetDirection) < 0.3):
+                elif(sensors[2] == 1):
+                    self.turnLeft(45)
                     break
-            sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_discontinue)
+                #Check new rotation distance
+                res, angle = simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+                angle = angle[2]*180/math.pi
+                da = previousAngle-angle
+                if da >= 0 :
+                    rot -= angle - previousAngle 
+                else:
+                    rot += angle - previousAngle
+                #If rotated desired amount, exit
+                if rot >= deg:
+                    #CopelliaSim's orientation layout is weird. Turn 90degrees or less at a time 
+                    if (deg > 90):
+                        self.turnLeft(deg-90) 
+                    break
+            sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_discontinue) #Stop stream
             #The robot has turned, now stop
             self.stop()
 

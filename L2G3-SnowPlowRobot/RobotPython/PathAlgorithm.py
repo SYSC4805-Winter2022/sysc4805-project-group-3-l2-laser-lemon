@@ -10,7 +10,7 @@ the pathing algorithm.
 import PlowApi as plow, ObstacleAvoidanceApi, LineDetectionApi, MovementApi
 
 # System Library Imports
-import sim, sys
+import sim, sys, time
 from random import randrange
 
 def startSimulation():
@@ -68,12 +68,12 @@ class SnowPlowRobot:
             plowArea = ObstacleAvoidanceApi.checkForObstaclePlow(self.clientId)
             if(plowArea):
                 self.motorControl.backward(0.3, -2)
-                if(self.turningLeft):
+                if(not self.turningLeft):
                     #Turn left a random degree from 150-230
-                    self.motorControl.turnLeft(90)
+                    self.motorControl.turnLeft(20)
                 else:
                     #Turn right a random degree from 150-230
-                    self.motorControl.turnRight(90)
+                    self.motorControl.turnRight(20)
                 self.turningLeft = (self.turningLeft  + 1) % 2
         except:
                 sim.simxFinish(self.clientId) 
@@ -89,17 +89,26 @@ class SnowPlowRobot:
         sensors = self.vision.detectLine()
         #If any sensor detects a line launch turning sequence
         if any(s == 1 for s in sensors):
-            self.motorControl.straightDist(0.2, -2)
+            time.sleep(0.2)
+            sensors = self.vision.detectLine()
+            #Check if all sensors are detecting the line
+            #If not, some snow might still be inside the perimeter
+            #Turn to the left or right to completely push out snow
+            if(sensors[0]== 1 and all(s==0 for s in sensors[:2])):
+                self.motorControl.turnLeft(45)
+            if(sensors[2]== 1 and all(s==0 for s in sensors[0:2])):
+                self.motorControl.turnRight(45)
+            self.motorControl.straightDist(0.3, -2)
             self.motorControl.stop()
             self.motorControl.backward(0.6,-2)
             #This ensures that the robot alternates if it turns left or right
             #after detecting a line
             if(self.turningLeft):
                 #Turn left a random degree from 150-230
-                self.motorControl.turnLeft(randrange(150, 230))
+                self.motorControl.turnLeft(randrange(90, 180))
             else:
                 #Turn right a random degree from 150-230
-                self.motorControl.turnRight(randrange(150, 230))
+                self.motorControl.turnRight(randrange(90, 180))
             self.motorControl.stop()
             self.turningLeft = (self.turningLeft  + 1) % 2
             #Continue driving straight
