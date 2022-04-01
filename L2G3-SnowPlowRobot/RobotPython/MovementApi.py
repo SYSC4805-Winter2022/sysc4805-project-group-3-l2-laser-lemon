@@ -6,11 +6,8 @@ The WheelModule class is responsible for the drive control of the robot.
 It provides functionality to driving straight, backwards, and turn left or right.
 """
 
-import sim
-import math
-import time
-import ObstacleAvoidanceApi as ObsAvoid
-import LineDetectionApi
+import sim, math, time
+import ObstacleAvoidanceApi as ObsAvoid, LineDetectionApi
 
 class MovingState:
     """States of the robot

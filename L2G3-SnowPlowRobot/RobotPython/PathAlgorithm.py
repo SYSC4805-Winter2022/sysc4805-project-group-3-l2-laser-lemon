@@ -7,16 +7,11 @@ robot modules (Vision, Obstacle Avoidance, Plow, Motors) and implementing
 the pathing algorithm.
 """
 #Robot Module Imports
-import PlowApi as plow
-import ObstacleAvoidanceApi
-import LineDetectionApi
-import MovementApi
+import PlowApi as plow, ObstacleAvoidanceApi, LineDetectionApi, MovementApi
 
 # System Library Imports
-import sim
-import sys
+import sim, sys
 from random import randrange
-import time
 
 def startSimulation():
     """Function to start to the remote api client
@@ -56,18 +51,34 @@ class SnowPlowRobot:
         self.motorControl.straight(-2)
         self.turningLeft = 1
         
-        #Continously check for line or obstacle
-        stopTime = time.time()
+        #Start the main robot loop sequence
         while True:
-            if (self.motorControl.robotState == 1):
-                stopTime = time.time() - stopTime 
-                if (stopTime > 5):
-                    self.motorControl.straight(-2)
-            else:
-                stopTime = time.time()
+            self.pathFindingAlgorithm()
+
+    def pathFindingAlgorithm(self):
+        """
+        This is the main path finding algorithm for the robot. The robot will avoid obstalces and
+        if it detects line it will turn in a new direction. Moving in a pinp-pong pattern.
+        """
+        try:
             self.checkForLine()
             obs = ObstacleAvoidanceApi.checkForObstacle(self.motorControl, self.clientId, [2/self.motorControl.wheelRadius, 2/self.motorControl.wheelRadius])
 
+            #Check if object is detect in plow area
+            plowArea = ObstacleAvoidanceApi.checkForObstaclePlow(self.clientId)
+            if(plowArea):
+                self.motorControl.backward(0.3, -2)
+                if(self.turningLeft):
+                    #Turn left a random degree from 150-230
+                    self.motorControl.turnLeft(90)
+                else:
+                    #Turn right a random degree from 150-230
+                    self.motorControl.turnRight(90)
+                self.turningLeft = (self.turningLeft  + 1) % 2
+        except:
+                sim.simxFinish(self.clientId) 
+                print("Connection Ended")
+                sys.exit(1)
     def checkForLine(self):
         """This function checks if a line is detected. 
         If a line is detected the robot will drive forward a bit more to 

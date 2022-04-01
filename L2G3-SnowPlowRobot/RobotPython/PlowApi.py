@@ -5,8 +5,7 @@ SYSC 4805 L2G3
 PlowApi.py is responsible for communicating with the plow module housed on the robot.
 It provides functionality to open and close the robot plow. 
 """
-import sim
-import time
+import sim, time
 
 def open(clientID):
     """This function tells the Lua program to initiate openning the plow
