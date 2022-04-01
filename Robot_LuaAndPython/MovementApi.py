@@ -1,7 +1,7 @@
-import sim
+
 import math
-import time
-import ObstacleAvoidanceApi as ObsAvoid
+#import time
+import ObstacleAvoidanceApi
 
 class MovingState:
     STOP = 1
@@ -11,97 +11,110 @@ class MovingState:
     TURNING_RIGHT = 5
 
 class WheelModule:
-    def __init__(self, clientId):
-        res, left_joint  = sim.simxGetObjectHandle(clientId, '/robot/leftJoint', sim.simx_opmode_blocking)
-        res, right_joint = sim.simxGetObjectHandle(clientId, '/robot/rightJoint', sim.simx_opmode_blocking)
-        res, leftWheel = sim.simxGetObjectHandle(clientId, '/robot/leftJoint/respondableLeftWheel_', sim.simx_opmode_blocking)
-        res, rightWheel = sim.simxGetObjectHandle(clientId, '/robot/rightJoint/respondableRightWheel_', sim.simx_opmode_blocking)
-        res, robot = sim.simxGetObjectHandle(clientId, '/robot', sim.simx_opmode_blocking)
+    def __init__(self):
+        left_joint  = sim.getObjectHandle('/robot/leftJoint')
+        right_joint = sim.getObjectHandle('/robot/rightJoint')
+        robot = sim.getObjectHandle('/robot')
         self.left_joint = left_joint
         self.right_joint = right_joint
-        self.rightWheel = rightWheel
-        self.leftWheel = leftWheel
         self.robot = robot
-        self.clientId = clientId
         self.emergencyStop = False
         self.wheelRadius = 0.172/2
         self.robotState = MovingState.STOP
-        self.velocity = 2/self.wheelRadius
-        self.initPos = sim.simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_blocking)[1]
+        self.velocity = -1
+        #self.ObsAvoid = ObstacleAvoidanceApi.ObstacleAvoidance(self.clientId, self)
 
     def setWheelVelocity(self, handle, velocity):
-        return sim.simxSetJointTargetVelocity(self.clientId, handle, velocity, sim.simx_opmode_oneshot)
+        return sim.setJointTargetVelocity(handle, velocity)
 
     def stop(self):
         self.robotState = MovingState.STOP
+        print("Stopping")
         self.callStraight(0)
         time.sleep(0.2)
 
     def turnRight(self, deg):
         self.robotState = MovingState.TURNING_RIGHT
         if(not self.emergencyStop):
-            sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_streaming)
             radToTurn = deg*math.pi/180
-            res, currRad = simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+            currRad = sim.getObjectOrientation(self.robot, -1)
             if (currRad[2] < 0):
                 currRad[2] += 6.28
             targetDirection = (currRad[2] - radToTurn)
             if(targetDirection < 0):
                 targetDirection = 6.28 + targetDirection
-            res = self.setWheelVelocity(self.left_joint, 0.7/self.wheelRadius)
-            res = self.setWheelVelocity(self.right_joint, -0.1/self.wheelRadius)
+            self.setWheelVelocity(self.left_joint, 0.7/self.wheelRadius)
+            self.setWheelVelocity(self.right_joint, -0.1/self.wheelRadius)
             while not self.emergencyStop:
-                res, currRad = simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+                if False: #self.ObsAvoid.checkForObstacle():
+                    self.emergencyStopFunc()
+                currRad = sim.getObjectOrientation(self.robot, -1)
                 currRad = currRad[2]
                 if (currRad < 0):
                    currRad += 6.28
                 if(math.fabs(currRad-targetDirection) < 0.3):
                     break
-            sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_discontinue)
             self.stop()
+
     def turnLeft(self, deg):
         self.robotState = MovingState.TURNING_LEFT
-        objectDetect = False
         if(not self.emergencyStop):
             radToTurn = deg*math.pi/180
-            sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_streaming)
-            res, currRad = sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+            currRad = sim.getObjectOrientation(self.robot, -1)
             if (currRad[2] < 0):
                 currRad[2] += 6.28
             targetDirection = (currRad[2] + radToTurn)
             if(targetDirection > 6.28):
                 targetDirection -= 6.28
-            res = self.setWheelVelocity(self.left_joint, -0.1/self.wheelRadius)
-            res = self.setWheelVelocity(self.right_joint, 0.7/self.wheelRadius)
+            self.setWheelVelocity(self.left_joint, -0.1/self.wheelRadius)
+            self.setWheelVelocity(self.right_joint, 0.7/self.wheelRadius)
             while not self.emergencyStop:
-                res, currRad = sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+                if False: #self.ObsAvoid.checkForObstacle():
+                    self.emergencyStopFunc()
+                res, currRad = sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_blocking)
                 currRad = currRad[2]
                 if (currRad < 0):
                     currRad += 6.28
                 if(math.fabs(currRad-targetDirection) < 0.3):
                     break
-            sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_discontinue)
             self.stop()
+        # if(not self.emergencyStop):
+        #     self.straightBool = False
 
+        #     targetDirection = self.changeDirection(self.currentDirection, deg, False)
+
+        #     res = self.setWheelVelocity(self.left_joint, -0.1/self.wheelRadius)
+        #     res = self.setWheelVelocity(self.right_joint, 0.7/self.wheelRadius)
+        #     while not self.emergencyStop:
+        #         res, currRad = sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_blocking)
+        #         currRad = currRad[2]
+        #         if(math.fabs(currRad-targetDirection) < 0.3):
+        #             break
+        #     self.stop()
     def straightDist(self, distance, velocity):
         self.robotState = MovingState.STRAIGHT
         if(not self.emergencyStop):
             self.straight(velocity)
             revs = distance/(math.pi*self.wheelRadius)
-            sim.simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_streaming)
-            res, origPosition = simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+            totalRads = 6.28*revs
+            rads = 0
+
+            res, prevRad = sim.simxGetJointPosition(self.clientId, self.right_joint, sim.simx_opmode_blocking)
+            res, origPosition = sim.simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_blocking)
             distanceTravelled = 0
             while distanceTravelled  < distance and not self.emergencyStop:
-                res, pos = simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+                if False: #self.ObsAvoid.checkForObstacle():
+                    self.emergencyStopFunc()
+                res, pos = sim.simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_blocking)
                 distanceTravelled = math.sqrt((origPosition[0]-pos[0])**2 + (origPosition[1]-pos[1])**2)
-            sim.simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_discontinue)
             self.stop()
     
     def straight(self, velocity):
         self.robotState = MovingState.STRAIGHT
         if(not self.emergencyStop):
-            angularV = -1*velocity/self.wheelRadius
-            self.callStraight(angularV)
+            angularV = 1*velocity/self.wheelRadius
+            self.setWheelVelocity(self.left_joint, angularV)
+            self.setWheelVelocity(self.right_joint, angularV)
 
         
         
@@ -109,18 +122,18 @@ class WheelModule:
     def backward(self, distance, velocity):
         self.robotState = MovingState.BACKWARD
         if(not self.emergencyStop):
-
             angularV = velocity/self.wheelRadius
-            sim.simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_streaming)
+            res, ori = sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_blocking)
             #sim.simxSetObjectOrientation(self.clientId, self.robot, -1, [ori[0], ori[1], self.direction[self.currentDirection]], sim.simx_opmode_blocking)
             self.callStraight(angularV)
             
-            res, origPosition = simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+            res, origPosition = sim.simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_blocking)
             distanceTravelled = 0
             while distanceTravelled  < distance and not self.emergencyStop:
-                res, pos = simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_buffer)
+                if False: #self.ObsAvoid.checkForObstacle():
+                    self.emergencyStopFunc()
+                res, pos = sim.simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_blocking)
                 distanceTravelled = math.sqrt((origPosition[0]-pos[0])**2 + (origPosition[1]-pos[1])**2)
-            sim.simxGetObjectPosition(self.clientId, self.robot, -1, sim.simx_opmode_discontinue)
             self.stop()                    
              
     def callStraight(self, velocity):
@@ -150,16 +163,4 @@ class WheelModule:
     
     def getRobotState(self):
         return self.robotState
-
-def simxGetObjectPosition(clientId, handle, reference, mode):
-    res, orientation = sim.simxGetObjectPosition(clientId, handle, reference, mode)
-    while (res != sim.simx_return_ok):
-        res, orientation = sim.simxGetObjectPosition(clientId, handle, reference, mode)
-    return res, orientation
-
-def simxGetObjectOrientation(clientId, handle, reference, mode):
-    res, orientation = sim.simxGetObjectOrientation(clientId, handle, reference, mode)
-    while (res != sim.simx_return_ok):
-        res, orientation = sim.simxGetObjectOrientation(clientId, handle, reference, mode)
-    return res, orientation
 

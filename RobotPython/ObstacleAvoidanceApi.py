@@ -1,84 +1,56 @@
-'''
-SYSC 4805 
-Group L2-3
-'''
-
-
 import sim
-import time as t
 import math
-import MovementApi
-from random import randrange
-class ObstacleAvoidance:
-    def __init__(self, clientId):
-        # res, left_joint  = sim.simxGetObjectHandle(clientId, 'leftJoint', sim.simx_opmode_blocking)
-        # res, right_joint = sim.simxGetObjectHandle(clientId, 'rightJoint', sim.simx_opmode_blocking)
-        # res, prox_sensor_front = sim.simxGetObjectHandle(clientId, 'Proximity_sensor0', sim.simx_opmode_blocking)
-        # res, prox_sensor_right = sim.simxGetObjectHandle(clientId, 'Proximity_sensorRight', sim.simx_opmode_blocking)
-        # #res, prox_sensor_back = sim.simxGetObjectHandle(clientId, 'Proximity_sensor2', sim.simx_opmode_blocking)
-        # res, prox_sensor_left= sim.simxGetObjectHandle(clientId, 'Proximity_sensorLeft', sim.simx_opmode_blocking)
-        # self.left_joint = left_joint
-        # self.right_joint = right_joint
-        # self.prox_sensor_right = prox_sensor_right
-        # self.prox_sensor_front = prox_sensor_front
-        # self.prox_sensor_left = prox_sensor_left
-        # #self.prox_sensor_back = prox_sensor_back
-        # self.clientID = clientId
-        # self.prevObst = False
-        # self.turningLeft = False
 
-        self.motors = MovementApi.WheelModule(self.clientID)
-        #sim.simxAddStatusbarMessage(self.clientID,'Obstacle avoidance script initiated.',sim.simx_opmode_oneshot)
-
-    def setWheelVelocity(self, handle, velocity):
-        return sim.simxSetJointTargetVelocity(self.clientID, handle, velocity, sim.simx_opmode_blocking)
-        
-    # main function - Might rename this later
-    #renamed and made callable by the main program, commented out some functions
-    def avoid_obstacle(self):
-        res = sim.simxGetObjectGroupData(self.clientID, 5, 13, sim.simx_opmode_blocking)
-        returnCode, detectionState = sim.simxReadProximitySensor(self.clientID, self.prox_sensor_front, sim.simx_opmode_streaming)[0:2] #simx_opmode_streaming
-        returnCode, detectrightSide = sim.simxReadProximitySensor(self.clientID, self.prox_sensor_right, sim.simx_opmode_streaming)[0:2] #simx_opmode_streaming
-        returnCode, detectleftSide = sim.simxReadProximitySensor(self.clientID, self.prox_sensor_left, sim.simx_opmode_streaming)[0:2] #simx_opmode_streaming
-        #returnCode, detectBack = sim.simxReadProximitySensor(self.clientID, self.prox_sensor_back, sim.simx_opmode_streaming)[0:2] #simx_opmode_streaming
-
-        if detectionState:
-            if(not self.prevObst):
-                self.prevObst = True
-                if(detectrightSide and not detectleftSide):
-                    print("Detected Right Side, turning left")
-                    res = self.setWheelVelocity(self.left_joint, -100*math.pi/180)
-                    res = self.setWheelVelocity(self.right_joint, 10*math.pi/180)
-                elif(not detectrightSide and detectleftSide):
-                    print("Detected left Side, turning right")
-                    res = self.setWheelVelocity(self.left_joint, 100*math.pi/180)
-                    res = self.setWheelVelocity(self.right_joint, -10*math.pi/180)
-                else:
-                    print("Detection")
-                    res = self.setWheelVelocity(self.left_joint, -100*math.pi/180)
-                    res = self.setWheelVelocity(self.right_joint, 10*math.pi/180)
-            else:
-                self.motors.emergencyStop()
-
-        elif False and detectBack:
-            self.prevObst = True
-            #Make Bot Move straight
-            self.motors.emergencyStopFunc()
-            res = self.setWheelVelocity(self.left_joint, 200*math.pi/-180)
-            res = self.setWheelVelocity(self.right_joint, 200*math.pi/-180)
-        else:
-            if(self.prevObst):
-                self.motors.straight(-2)
-                self.prevObst = False
 def checkForObstacle(motorControl, clientId, velocity):
     inputIntegers = []
-    inputFloats = [velocity]
+    inputFloats = [velocity[0], velocity[1]]
     inputStrings = []
     inputBuffer = bytearray()
+    #checkIfInBounds(motorControl, clientId)
+    inputFloats = [2/motorControl.wheelRadius, 2/motorControl.wheelRadius]
     res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, 'robot', sim.sim_scripttype_childscript, 'detectObstacle',
                                 inputIntegers, inputFloats, inputStrings, inputBuffer, sim.simx_opmode_blocking)
     
     if res == sim.simx_return_ok:
         if(len(retInts) > 0):
-            return retInts[0]
+            if(retInts[0] == 1):
+                return True
         return False
+
+def checkIfInBounds(motorControl, clientId):
+    res, currentPos = sim.simxGetObjectPosition(clientId, motorControl.robot, -1, sim.simx_opmode_blocking)
+    print(currentPos)
+    print(motorControl.initPos)
+    inBounds = True
+    if motorControl.initPos[0] + 6.2 < currentPos[0]:
+        inBounds = False
+    elif motorControl.initPos[0] - 6.2 > currentPos[0]:
+        inBounds = False
+    elif (motorControl.initPos[1] + 12.2) < currentPos[1]:
+        inBounds = False
+    elif motorControl.initPos[1] > currentPos[1]:
+        inBounds = False
+    if (not inBounds):
+        print("Not in bounds")
+        RotateToCenter(motorControl, clientId)
+    print("In Bounds")
+    return
+def RotateToCenter(motorControl, clientId):
+    motorControl.stop()
+    res, currentAngle = sim.simxGetObjectOrientation(clientId, motorControl.robot, -1, sim.simx_opmode_blocking)
+    uAngle = currentAngle[2]
+    res, currentPos = sim.simxGetObjectPosition(clientId, motorControl.robot, -1, sim.simx_opmode_blocking)
+    u = [math.cos(uAngle), math.sin(uAngle)]
+    r = [-currentPos[0], -currentPos[1]]
+    rDistance = VectorDistance(r, [0,0])
+    r = [-currentPos[0]/rDistance, -currentPos[1]/rDistance]
+    angle = dotProduct(u, r)
+    motorControl.turnLeft(angle)
+
+def dotProduct(v1, v2):
+    dot = (v1[0]*v2[0]+v1[1]*v2[1])
+    print(dot)
+    return math.acos()
+    
+def VectorDistance(v1, v2):
+    return math.sqrt((v2[0]-v1[0])**2 + (v2[1]+v1[1])**2)

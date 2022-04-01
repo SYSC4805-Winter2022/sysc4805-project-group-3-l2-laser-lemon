@@ -1,3 +1,4 @@
+
 import PlowApi as plow
 import ObstacleAvoidanceApi
 import LineDetectionApi
@@ -10,14 +11,13 @@ import sim
 import sys
 from ctypes import c_wchar_p
 from random import randrange
-import math
 
 
 flagEastWest = True
 def startSimulation():
     print ('Program started')
     sim.simxFinish(-1)
-    clientId = sim.simxStart('127.0.0.1',19997,True,True,5000,1)
+    clientId = sim.simxStart('127.0.0.1',19996,True,True,5000,1)
     if clientId == -1:
         print("Connection Unsuccesful")
         sys.exit(-1)
@@ -36,6 +36,7 @@ class SnowPlowRobot:
         self.clientId = startSimulation()
         self.vision = LineDetectionApi.VisionModule(self.clientId)
         self.motorControl = MovementApi.WheelModule(self.clientId)
+        self.obsAvoidance = ObstacleAvoidanceApi.ObstacleAvoidance(self.clientId, self.motorControl)
 
         self.runMainLoop = False
         plow.open(self.clientId)
@@ -45,34 +46,40 @@ class SnowPlowRobot:
         self.motorControl.stop()
         self.motorControl.straight(-2)
         self.turningLeft = 1
-
+        print("Entering Detection Loop")
         while True:
             self.checkForLine()
-            obs = ObstacleAvoidanceApi.checkForObstacle(self.motorControl, self.clientId, [2/self.motorControl.wheelRadius, 2/self.motorControl.wheelRadius])
+            self.obsAvoidance.checkForObstacle()
 
     def checkForLine(self):
         
         newDetection = True
         loop = None
+        bounds = True#self.checkIfInBounds()
         sensors = self.vision.detectLine()
+        if(bounds):
+            if any(s == 1 for s in sensors):
+                self.motorControl.straightDist(0.2, -2)
+                self.motorControl.stop()
+                self.motorControl.backward(0.6,-2)
 
-        if any(s == 1 for s in sensors):
-            self.motorControl.straightDist(0.2, -2)
-            self.motorControl.stop()
-            self.motorControl.backward(0.6,-2)
-
-            if(self.turningLeft):
-                self.motorControl.turnLeft(randrange(135, 250))
+                if(self.turningLeft):
+                    self.motorControl.turnLeft(randrange(135, 270))
+                else:
+                    self.motorControl.turnRight(randrange(135, 270))
+                self.motorControl.stop()
+                self.turningLeft = (self.turningLeft  + 1) % 2
+                self.motorControl.straight(-2)
             else:
-                self.motorControl.turnRight(randrange(135, 250))
-            self.motorControl.stop()
-            self.turningLeft = (self.turningLeft  + 1) % 2
-            self.motorControl.straight(-2)
-        else:
-            newDetection = True      
+                newDetection = True      
+
+
 
 if __name__ == "__main__":
     
     #obsAvoid = ObstacleAvoidanceApi.ObstacleAvoidance(clientId)
     print("Welcome to Lemon-Laser's Autonomous Snow Plow Robot")
     LemonLaserPlow = SnowPlowRobot()
+    while True:
+        continue
+
