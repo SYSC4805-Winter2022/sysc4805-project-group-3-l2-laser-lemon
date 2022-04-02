@@ -38,7 +38,25 @@ The simulation is best runned with
     - Physics Engine: Bullet 2.78
     - Dynamic Settings: balanced
     - Simulation Time Step: 50ms
+-------------------------------------------------------------------------------------------------------------
 
+-------------------------------------------------------------------------------------------------------------
+Team Members:
+    Timothy Knowles - 101097700
+    Denise Mayo - 101044064
+    Emma Boulay - 101073617
+    Chhavi Sujeebun - 101126487
+-------------------------------------------------------------------------------------------------------------
 
-
+-------------------------------------------------------------------------------------------------------------
+Contribution:
+    Emma Boulay
+        - PathAlgorithm.py
+        - MovementApi.py
+        - ObstacleAvoidanceApi.py
+        - PlowApi.py
+        - LineDetectionApi.py
+        - PlowControl.Lua
+        - RobotMain.Lua
+        - SafetyLight.Lua
 -------------------------------------------------------------------------------------------------------------
