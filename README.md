@@ -6,7 +6,12 @@ sysc4805-project-group-3-l2-laser-lemon created by GitHub Classroom
 The overall objective is to design an autonomous snow plough robot using CoppeliaSim that will clear the snow off an area enclosed by a closed path while avoiding fixed and moving obstacles. 
 
 -------------------------------------------------------------------------------------------------------------
-Requirements:
+# Report
+* The final report is locacted in the "Reports" Folder
+
+-------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------
+# Requirements:
 1. CoppelisSim Education 4.3
     |--> Other editions may yield unexpected beviour
     |--> The robot was built and tested in 4.3
@@ -16,7 +21,7 @@ Requirements:
 -------------------------------------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------------------------------------
-How to set up environment
+# How to set up environment
 1. Dowload CoppeliaSim Education 4.3 from https://www.coppeliarobotics.com/downloads
 2. Python 3.9 can be downloaded from https://www.python.org/downloads/release/python-3912/
 2. Unzip the "L2G3-SnowPlowRobot.zip" file onto your local machine
@@ -31,7 +36,7 @@ How to set up environment
 -------------------------------------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------------------------------------
-File Directory:
+# File Directory:
 * Python Files are located in "L2G3-SnowPlowRobot/Robot Python" folder
     * "PathAlgorithm.py" contains the main function
 * The Snow Plow Robot model is in "L2G3-SnowPlowRobot > Model > L2G3-SnowPlowModel.ttm"
@@ -39,7 +44,7 @@ File Directory:
 -------------------------------------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------------------------------------
-Simulation Speed:
+# Simulation Speed:
 The simulation is best runned with
 * Physics Engine: Bullet 2.78
 * Dynamic Settings: balanced
