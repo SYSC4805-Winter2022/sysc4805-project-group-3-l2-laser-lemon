@@ -1,8 +1,8 @@
 # SYSC 4805 Project group 3-L2 Team Laser Lemon
+Gitub Link: https://github.com/SYSC4805-Winter2022/sysc4805-project-group-3-l2-laser-lemon
 
-
-sysc4805-project-group-3-l2-laser-lemon created by GitHub Classroom
-
+-------------------------------------------------------------------------------------------------------------
+## Objective
 The overall objective is to design an autonomous snow plough robot using CoppeliaSim that will clear the snow off an area enclosed by a closed path while avoiding fixed and moving obstacles. 
 
 -------------------------------------------------------------------------------------------------------------
