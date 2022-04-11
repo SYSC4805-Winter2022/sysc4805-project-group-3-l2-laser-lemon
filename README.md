@@ -32,8 +32,8 @@ How to set up environment
 
 -------------------------------------------------------------------------------------------------------------
 File Directory:
-*Python Files are located in "L2G3-SnowPlowRobot/Robot Python" folder
-    *|--> "PathAlgorithm.py" contains the main function
+* Python Files are located in "L2G3-SnowPlowRobot/Robot Python" folder
+    * "PathAlgorithm.py" contains the main function
 * The Snow Plow Robot model is in "L2G3-SnowPlowRobot > Model > L2G3-SnowPlowModel.ttm"
 * Training maps with our current robot model loaded in is found in "Training Maps" folder
 -------------------------------------------------------------------------------------------------------------
@@ -43,5 +43,6 @@ Simulation Speed:
 The simulation is best runned with
     * Physics Engine: Bullet 2.78
     * Dynamic Settings: balanced
-    * Simulation Time Step: 50ms
+    * Simulation time step: 50 ms
+    
 -------------------------------------------------------------------------------------------------------------
