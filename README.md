@@ -41,8 +41,8 @@ File Directory:
 -------------------------------------------------------------------------------------------------------------
 Simulation Speed:
 The simulation is best runned with
-    * Physics Engine: Bullet 2.78
-    * Dynamic Settings: balanced
-    * Simulation time step: 50 ms
+* Physics Engine: Bullet 2.78
+* Dynamic Settings: balanced
+* Simulation time step: 50 ms
     
 -------------------------------------------------------------------------------------------------------------
