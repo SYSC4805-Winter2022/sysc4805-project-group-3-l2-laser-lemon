@@ -14,7 +14,7 @@ def open(clientID):
         clientID (int): The client id for the Remote Api Server
     """
      # This makes a call to the Lua program to open the plow
-    sim.simxCallScriptFunction(clientID, 'plow_middle_panel', sim.sim_scripttype_childscript, 'onOpen',
+    sim.simxCallScriptFunction(clientID, '/robot/plow_middle_panel', sim.sim_scripttype_childscript, 'onOpen',
                                 [],[], [], bytearray(), sim.simx_opmode_blocking)
     opening = True
     #Wait until plow finishes opening before continuing
@@ -32,7 +32,7 @@ def close(clientID):
         clientID (int): The client id for the Remote Api Server
     """
     # This makes a call to the Lua program to close the plow
-    sim.simxCallScriptFunction(clientID, 'plow_middle_panel', sim.sim_scripttype_childscript, 'onClose',
+    sim.simxCallScriptFunction(clientID, '/robot/plow_middle_panel', sim.sim_scripttype_childscript, 'onClose',
                                 [],[], [], bytearray(), sim.simx_opmode_blocking)
     closing = True
     #Wait until plow finishes closing before continuing

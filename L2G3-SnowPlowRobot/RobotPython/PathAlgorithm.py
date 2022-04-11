@@ -97,6 +97,10 @@ class SnowPlowRobot:
             if(self.turningLeft):
                 #Turn left a random degree from 90-180
                 self.motorControl.turnLeft(randrange(90, 180))
+                #self.motorControl.turnLeft(90)
+                #self.motorControl.straightDist(0.4, -2)
+                #self.motorControl.turnLeft(90)
+
             else:
                 #Turn right a random degree from 90-180
                 self.motorControl.turnRight(randrange(90, 180))

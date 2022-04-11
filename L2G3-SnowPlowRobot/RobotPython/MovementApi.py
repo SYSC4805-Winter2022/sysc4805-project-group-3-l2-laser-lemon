@@ -105,6 +105,7 @@ class WheelModule:
             sim.simxGetObjectOrientation(self.clientId, self.robot, -1, sim.simx_opmode_discontinue) #Stop stream
             #The robot has turned, now stop
             self.stop()
+    
     def turnLeft(self, deg):
         """Turns the robot deg degrees to the right and moves the robot to the
         "TURNING_RIGHT" state. If an emergencyStop is requested the robot will stop turning
@@ -237,7 +238,7 @@ class WheelModule:
         Args:
             velocity (float): The velocity in rad/s
         """
-        sim.simxCallScriptFunction(self.clientId, 'robot', sim.sim_scripttype_childscript, 'straight',
+        sim.simxCallScriptFunction(self.clientId, '/robot', sim.sim_scripttype_childscript, 'straight',
                                     [], [velocity], [], bytearray(), sim.simx_opmode_blocking)
 
     def emergencyStopFunc(self):

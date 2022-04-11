@@ -21,7 +21,7 @@ def checkForObstacle(motorControl, clientId, velocity):
         _type_: _description_
     """
     #Make call to Lua program to run object detection and avoidance function
-    res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, 'robot', sim.sim_scripttype_childscript, 'detectObstacle',
+    res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, '/robot', sim.sim_scripttype_childscript, 'detectObstacle',
                                 [], [velocity[0], velocity[1]], [], bytearray(), sim.simx_opmode_blocking)
     #The Lua call returns 1 if an object was detected
     if res == sim.simx_return_ok:
@@ -39,7 +39,7 @@ def checkForObstacleBackwards(clientId):
         obstacleDetected (boolean): True if obstacle detected, False otherwise
     """
     #Make call to Lua program to run object detection and avoidance function
-    res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, 'robot', sim.sim_scripttype_childscript, 'detectObstacleBackwards',
+    res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, '/robot', sim.sim_scripttype_childscript, 'detectObstacleBackwards',
                                 [], [], [], bytearray(), sim.simx_opmode_blocking)
     #The Lua call returns 1 if an object was detected
     if res == sim.simx_return_ok:
@@ -58,7 +58,7 @@ def checkForObstacleTurning(clientId):
         obstacleDetected (boolean): True if obstacle detected, False otherwise
     """
     #Make call to Lua program to run object detection and avoidance function
-    res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, 'robot', sim.sim_scripttype_childscript, 'detectObstacleTurning',
+    res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, '/robot', sim.sim_scripttype_childscript, 'detectObstacleTurning',
                                 [], [], [], bytearray(), sim.simx_opmode_blocking)
     #The Lua call returns 1 if an object was detected
     if res == sim.simx_return_ok:
@@ -77,7 +77,7 @@ def checkForObstaclePlow(clientId):
         obstacleDetected (boolean): True if obstacle detected, False otherwise
     """
     #Make call to Lua program to run object detection and avoidance function
-    res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, 'robot', sim.sim_scripttype_childscript, 'detectObstaclePlow',
+    res,retInts,retFloats,retStrings,retBuffer = sim.simxCallScriptFunction(clientId, '/robot', sim.sim_scripttype_childscript, 'detectObstaclePlow',
                                 [], [], [], bytearray(), sim.simx_opmode_blocking)
     #The Lua call returns 1 if an object was detected
     if res == sim.simx_return_ok:
