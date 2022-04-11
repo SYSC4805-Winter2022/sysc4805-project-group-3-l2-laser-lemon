@@ -7,7 +7,7 @@ The overall objective is to design an autonomous snow plough robot using Coppeli
 
 -------------------------------------------------------------------------------------------------------------
 ## Report
-* The final report is locacted in the "Reports" Folder
+* The final report ("L2G3-FinalReport.pdf") is locacted in the "Reports" Folder
 
 -------------------------------------------------------------------------------------------------------------
 ## Requirements:
