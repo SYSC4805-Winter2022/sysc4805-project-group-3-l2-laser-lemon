@@ -32,10 +32,10 @@ How to set up environment
 
 -------------------------------------------------------------------------------------------------------------
 File Directory:
---Python Files are located in "L2G3-SnowPlowRobot/Robot Python" folder
+/-/-Python Files are located in "L2G3-SnowPlowRobot/Robot Python" folder
     |--> "PathAlgorithm.py" contains the main function
--- The Snow Plow Robot model is in "L2G3-SnowPlowRobot > Model > L2G3-SnowPlowModel.ttm"
--- Training maps with our current robot model loaded in is found in "Training Maps" folder
+/-/- The Snow Plow Robot model is in "L2G3-SnowPlowRobot > Model > L2G3-SnowPlowModel.ttm"
+/-/- Training maps with our current robot model loaded in is found in "Training Maps" folder
 -------------------------------------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------------------------------------
